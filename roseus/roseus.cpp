@@ -709,7 +709,8 @@ pointer ROSEUS_CREATE_NODEHANDLE(register context *ctx,int n,pointer *argv)
 pointer ROSEUS_SPIN(register context *ctx,int n,pointer *argv)
 {
   isInstalledCheck;
-  while (ctx->intsig==0 && ros::ok()) {
+  while (ros::ok()) {
+    breakck;
     ros::spinOnce();
     s_rate->sleep();
   }
