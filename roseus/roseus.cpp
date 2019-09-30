@@ -782,7 +782,19 @@ pointer ROSEUS_DURATION_SLEEP(register context *ctx,int n,pointer *argv)
   numunion nu;
   ckarg(1);
   float sleep=ckfltval(argv[0]);
-  ros::Duration(sleep).sleep();
+  // overwrite in order to check for interruptions
+  // original behaviour is stated at `ros_wallsleep', in time.cpp
+  if (ros::Time::useSystemTime()) {
+    int sleep_sec=(int)sleep;
+    int sleep_nsec=(int)(1000000000*(sleep-sleep_sec));
+    struct timespec treq,trem;
+    GC_REGION(treq.tv_sec  =  sleep_sec;
+              treq.tv_nsec =  sleep_nsec);
+    while (nanosleep(&treq, &trem)<0) {
+      breakck;
+      treq=trem;}}
+  else {
+    ros::Duration(sleep).sleep();}
   return(T);
 }
 
