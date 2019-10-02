@@ -1076,6 +1076,7 @@ pointer ROSEUS_GETTOPICPUBLISHER(register context *ctx,int n,pointer *argv)
 pointer ROSEUS_WAIT_FOR_SERVICE(register context *ctx,int n,pointer *argv)
 {
   isInstalledCheck;
+  ros::Time start_time = ros::Time::now();
   numunion nu;
   string service;
 
@@ -1088,9 +1089,28 @@ pointer ROSEUS_WAIT_FOR_SERVICE(register context *ctx,int n,pointer *argv)
   if( n > 1 )
     timeout = ckfltval(argv[1]);
 
-  bool bSuccess = service::waitForService(service, ros::Duration(timeout));
+  // Overwrite definition on service.cpp L87 to check for signal interruptions
+  // http://docs.ros.org/electric/api/roscpp/html/service_8cpp_source.html
+  bool printed = false;
+  bool result = false;
+  ros::Duration timeout_duration = ros::Duration(timeout);
+  while (ctx->intsig==0 && ros::ok()) {
+    if (service::exists(service, !printed)) {
+      result = true;
+      break;}
+    else {
+      printed = true;
+      if (timeout >= 0) {
+        ros::Time current_time = ros::Time::now();
+        if ((current_time - start_time) >= timeout_duration)
+          return(NIL);}
+      ros::Duration(0.02).sleep();}
+  }
 
-  return (bSuccess?T:NIL);
+  if (result && printed && ros::ok())
+    ROS_INFO("waitForService: Service [%s] is now available.", service.c_str());
+
+  return (result?T:NIL);
 }
 
 pointer ROSEUS_SERVICE_EXISTS(register context *ctx,int n,pointer *argv)
