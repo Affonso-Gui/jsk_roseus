@@ -564,6 +564,7 @@ void roseusSignalHandler(int sig)
     // memoize for euslisp handler...
     context *ctx=euscontexts[thr_self()];
     ctx->intsig = sig;
+    ros::Time::shutdown();
 }
 
 /************************************************************
