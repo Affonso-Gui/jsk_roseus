@@ -2,7 +2,6 @@
                  lisp::*loaded-modules*
                  :key #'lisp::load-module-file-name
                  :test #'equal))
-  (make-package "ROS")
   (unless (some #'(lambda (p) (probe-file (concatenate-pathnames  p "roseus_c.so")))
                 (union *loader-current-directory* *load-path* :test #'string=))
     (warning-message 1 ";; could not find roseus_c.so, try rosmake roseus")
@@ -26,17 +25,6 @@
    (format *error-output* ", exitting...~C[0m~%"  #x1b)
    (exit 1))
 
-;; check if this process is created by roslaunch
-(when (let ((arg (car (last lisp::*eustop-argument*))))
-        (and (>= (length arg) 7) (string= "__log:=" (subseq arg 0 7))))
-  (ros::ROS-INFO "install ros::roseus-sigint-handler")
-  (setq lisp::*exit-on-fatal-error* t)
-  (lisp::install-error-handler 'ros::roseus-error)
-  (unix:signal unix::sigint 'ros::roseus-sigint-handler)
-  (unix:signal unix::sighup 'ros::roseus-sigint-handler)
-  (defmacro user::do-until-key (&rest forms) `(while t ,@forms))
-  (defun user::y-or-n-p (&rest args) t))
-
 (defun ros::roseus (name &key
                     (anonymous t)
                     (logger "ros.roseus")
@@ -59,7 +47,6 @@
 
 (setq ros::*compile-message* nil)
 
-(shadow 'object *package*)
 (defclass ros::object
   :super propertied-object
   :slots (_connection-header))
@@ -69,7 +56,6 @@
   (:datatype- ()  (get (class self) :datatype-))
   (:connection-header () _connection-header))
 
-(shadow 'time *package*)
 (defclass ros::time
   :super ros::object
   :slots (sec-nsec))
