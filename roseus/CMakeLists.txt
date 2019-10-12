@@ -65,13 +65,13 @@ else()
 endif()
 message("-- Set euslisp_INCLUDE_DIRS to ${euslisp_INCLUDE_DIRS}")
 include_directories(/usr/include /usr/X11R6/include ${euslisp_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
-add_library(roseus roseus.cpp)
-add_library(eustf eustf.cpp)
+add_library(roseus_c roseus.cpp)
+add_library(eustf_c eustf.cpp)
 add_library(roseus_c_util roseus_c_util.c)
-target_link_libraries(roseus ${rospack_LIBRARIES} ${roscpp_LIBRARIES})
-target_link_libraries(eustf  ${roscpp_LIBRARIES} ${tf_LIBRARIES} ${tf2_ros_LIBRARIES})
-set_target_properties(roseus PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/euslisp)
-set_target_properties(eustf PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/euslisp)
+target_link_libraries(roseus_c ${rospack_LIBRARIES} ${roscpp_LIBRARIES})
+target_link_libraries(eustf_c  ${roscpp_LIBRARIES} ${tf_LIBRARIES} ${tf2_ros_LIBRARIES})
+set_target_properties(roseus_c PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/euslisp)
+set_target_properties(eustf_c PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/euslisp)
 set_target_properties(roseus_c_util PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/euslisp)
 
 # compile flags
@@ -115,10 +115,10 @@ endif()
 
 
 include_directories(${Boost_INCLUDE_DIRS})
-target_link_libraries(roseus ${Boost_LIBRARIES})
+target_link_libraries(roseus_c ${Boost_LIBRARIES})
 
-set_target_properties(roseus PROPERTIES PREFIX "" SUFFIX ".so")
-set_target_properties(eustf PROPERTIES PREFIX "" SUFFIX ".so")
+set_target_properties(roseus_c PROPERTIES PREFIX "" SUFFIX ".so")
+set_target_properties(eustf_c PROPERTIES PREFIX "" SUFFIX ".so")
 set_target_properties(roseus_c_util PROPERTIES PREFIX "" SUFFIX ".so")
 
 add_service_files(
@@ -137,7 +137,7 @@ add_custom_command(OUTPUT ${CATKIN_DEVEL_PREFIX}/bin/roseus
   COMMAND cmake -E make_directory ${CATKIN_DEVEL_PREFIX}/bin/
   COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/bin/roseus ${CATKIN_DEVEL_PREFIX}/bin/roseus
   DEPENDS bin/roseus)
-add_custom_target(install_roseus ALL DEPENDS ${CATKIN_DEVEL_PREFIX}/bin/roseus roseus eustf roseus_c_util)
+add_custom_target(install_roseus ALL DEPENDS ${CATKIN_DEVEL_PREFIX}/bin/roseus roseus_c eustf_c roseus_c_util)
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need

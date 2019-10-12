@@ -6,7 +6,7 @@
 (use-package "GEOMETRY")
 
 ;; load c-binding library
-(load-library "eustf.so" '("eustf"))
+(load-library "eustf_c.so" '("eustf"))
 
 ;; include ros messages packages
 (ros::roseus-add-msgs "std_msgs")

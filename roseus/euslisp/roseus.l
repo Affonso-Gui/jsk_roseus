@@ -3,11 +3,11 @@
                  :key #'lisp::load-module-file-name
                  :test #'equal))
   (make-package "ROS")
-  (unless (some #'(lambda (p) (probe-file (concatenate-pathnames  p "roseus.so")))
+  (unless (some #'(lambda (p) (probe-file (concatenate-pathnames  p "roseus_c.so")))
                 (union *loader-current-directory* *load-path* :test #'string=))
-    (warning-message 1 ";; could not find roseus.so, try rosmake roseus")
+    (warning-message 1 ";; could not find roseus_c.so, try rosmake roseus")
     (exit -1))
-  (load-library "roseus.so" '("roseus")))
+  (load-library "roseus_c.so" '("roseus")))
 
 (unless (member :ros *features*) (push :ros *features*))
 (warning-message 3 ";; loading roseus(~A) on euslisp(~A)~%" (car ros::roseus-repo-version) lisp::lisp-implementation-version)
