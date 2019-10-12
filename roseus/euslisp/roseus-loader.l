@@ -1,13 +1,20 @@
 ;; create ROS package and shadow conflicting symbols
-(let ((ros-pkg (or (find-package "ROS") (make-package "ROS"))))
+(let ((ros-pkg (or (find-package "ROS") (make-package "ROS" :use (list "LISP" "GEOMETRY")))))
   (shadow 'object ros-pkg)
   (shadow 'time ros-pkg))
 
-;; load files
+;; load core file
 (load "roseus" :package "ROS")
+
+;; include ros messages packages
+(ros::roseus-add-msgs "std_msgs")
+(ros::roseus-add-msgs "geometry_msgs")
+
+;; load more files
 (load "eustf" :package "ROS")
 (load "actionlib" :package "ROS")
 (load "roseus-utils")
+
 
 ;; check if this process is created by roslaunch
 (when (let ((arg (car (last lisp::*eustop-argument*))))
