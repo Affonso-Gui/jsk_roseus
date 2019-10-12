@@ -6,6 +6,10 @@ project(roseus)
 # TODO: remove all from COMPONENTS that are not catkin packages.
 find_package(catkin REQUIRED COMPONENTS message_generation roslang roscpp rospack topic_tools actionlib actionlib_msgs visualization_msgs tf geometry_msgs std_msgs std_srvs sensor_msgs visualization_msgs tf2_ros dynamic_reconfigure actionlib_tutorials geneus)
 
+add_custom_target(compile_roseus ALL
+  DEPENDS ${PROJECT_SOURCE_DIR}/euslisp/Makefile
+  COMMAND \$\(MAKE\) -C ${PROJECT_SOURCE_DIR}/euslisp -f Makefile)
+
 configure_file(${PROJECT_SOURCE_DIR}/bin/roseus.in ${PROJECT_SOURCE_DIR}/bin/roseus @ONLY)
 
 add_definitions(-Wall)
