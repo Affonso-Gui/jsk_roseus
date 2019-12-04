@@ -567,7 +567,7 @@ void roseusSignalHandler(int sig)
     ros::Time::shutdown();
 }
 
-bool get_nodehandle(pointer name_ptr, string* groupname, boost::shared_ptr<NodeHandle> hdl)
+bool get_nodehandle(pointer name_ptr, string* groupname, boost::shared_ptr<NodeHandle>* hdl)
 {
   string name;
   if (isstring(name_ptr)) name.assign((char *)get_string(name_ptr));
@@ -578,7 +578,7 @@ bool get_nodehandle(pointer name_ptr, string* groupname, boost::shared_ptr<NodeH
   map<string, boost::shared_ptr<NodeHandle > >::iterator it = s_mapHandle.find(name);
   if( it == s_mapHandle.end() ) return false;
 
-  if (hdl) hdl = (it->second);
+  if (hdl!=NULL) *hdl = it->second;
   return true;
 }
 
@@ -701,7 +701,7 @@ pointer ROSEUS_CREATE_NODEHANDLE(register context *ctx,int n,pointer *argv)
     else error(E_NOSTRING);
   }
 
-  if (get_nodehandle(argv[0], &groupname, boost::shared_ptr<NodeHandle>())) {
+  if (get_nodehandle(argv[0], &groupname, NULL)) {
     ROS_DEBUG("groupname \"%s\" is already used", groupname.c_str());
     return (NIL);
   }
@@ -742,7 +742,7 @@ pointer ROSEUS_SPINONCE(register context *ctx,int n,pointer *argv)
   if(n>0) {
     string groupname;
     boost::shared_ptr<NodeHandle > hdl;
-    if (get_nodehandle(argv[0], &groupname, hdl)) {
+    if (get_nodehandle(argv[0], &groupname, &hdl)) {
       queue = (CallbackQueue *)hdl->getCallbackQueue();}
     else {
       ROS_ERROR("Groupname \"%s\" is missing", groupname.c_str());
@@ -878,7 +878,8 @@ pointer ROSEUS_SUBSCRIBE(register context *ctx,int n,pointer *argv)
     if (argv[n-2] == K_ROSEUS_GROUPNAME) {
       string groupname;
       boost::shared_ptr<NodeHandle > hdl;
-      if (get_nodehandle(argv[n-1], &groupname, hdl)) {
+      if (get_nodehandle(argv[n-1], &groupname, &hdl)) {
+        ROS_DEBUG("subscribe with groupname=%s", groupname.c_str());
         lnode = hdl.get();
       } else {
         ROS_ERROR("Groupname \"%s\" is missing. Topic %s is not subscribed. Call (ros::create-nodehandle \"%s\") first.",
