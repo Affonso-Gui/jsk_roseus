@@ -27,7 +27,6 @@
 
 (defun ros::roseus (name &key
                     (anonymous t)
-                    (logger "ros.roseus")
                     (level ros::*rosinfo*)
                     (args lisp::*eustop-argument*))
   "Register roseus client node with the master under the specified name"
@@ -42,7 +41,7 @@
           (setf (elt lisp::*eustop-argument* i)
                 (format nil "(warning-message 1 \"ignore ~a~%\")"
                         (elt lisp::*eustop-argument* i)))))
-      (ros::set-logger-level logger level)
+      (ros::set-logger-level level)
       )))
 
 (setq ros::*compile-message* nil)

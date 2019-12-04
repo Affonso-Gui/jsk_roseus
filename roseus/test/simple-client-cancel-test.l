@@ -236,7 +236,7 @@
 
 ;(ros::service-call "~set_logger_level"
 ;                   (instance roscpp::SetLoggerLevelRequest
-;                             :init :logger "ros.roseus" :level "DEBUG"))
+;                             :init :level ros::*rosdebug*))
 
 (run-all-tests)
 (exit)
