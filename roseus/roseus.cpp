@@ -702,7 +702,7 @@ pointer ROSEUS_CREATE_NODEHANDLE(register context *ctx,int n,pointer *argv)
   }
 
   if (get_nodehandle(argv[0], &groupname, boost::shared_ptr<NodeHandle>())) {
-    ROS_DEBUG("groupname %s is already used", groupname.c_str());
+    ROS_DEBUG("groupname \"%s\" is already used", groupname.c_str());
     return (NIL);
   }
 
@@ -745,7 +745,7 @@ pointer ROSEUS_SPINONCE(register context *ctx,int n,pointer *argv)
     if (get_nodehandle(argv[0], &groupname, hdl)) {
       queue = (CallbackQueue *)hdl->getCallbackQueue();}
     else {
-      ROS_ERROR("Groupname %s is missing", groupname.c_str());
+      ROS_ERROR("Groupname \"%s\" is missing", groupname.c_str());
       error(E_USER, "groupname not found");
     }
   }
@@ -881,7 +881,7 @@ pointer ROSEUS_SUBSCRIBE(register context *ctx,int n,pointer *argv)
       if (get_nodehandle(argv[n-1], &groupname, hdl)) {
         lnode = hdl.get();
       } else {
-        ROS_ERROR("Groupname %s is missing. Topic %s is not subscribed. Call (ros::create-nodehandle \"%s\") first.",
+        ROS_ERROR("Groupname \"%s\" is missing. Topic %s is not subscribed. Call (ros::create-nodehandle \"%s\") first.",
                   groupname.c_str(), topicname.c_str(), groupname.c_str());
         return (NIL);
       }
