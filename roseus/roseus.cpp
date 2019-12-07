@@ -864,7 +864,7 @@ pointer ROSEUS_EXIT(register context *ctx,int n,pointer *argv)
 pointer ROSEUS_SUBSCRIBE(register context *ctx,int n,pointer *argv)
 {
   isInstalledCheck;
-  string topicname;
+  string topicname, groupname;
   pointer message, fncallback, args;
   int queuesize = 1;
   NodeHandle *lnode = s_node.get();
@@ -876,7 +876,6 @@ pointer ROSEUS_SUBSCRIBE(register context *ctx,int n,pointer *argv)
 
   if (n > 1 && issymbol(argv[n-2]) && isstring(argv[n-1])) {
     if (argv[n-2] == K_ROSEUS_GROUPNAME) {
-      string groupname;
       boost::shared_ptr<NodeHandle > hdl;
       if (get_nodehandle(argv[n-1], &groupname, &hdl)) {
         ROS_DEBUG("subscribe with groupname=%s", groupname.c_str());
@@ -906,6 +905,7 @@ pointer ROSEUS_SUBSCRIBE(register context *ctx,int n,pointer *argv)
   Subscriber subscriber = lnode->subscribe(so);
   boost::shared_ptr<Subscriber> sub = boost::shared_ptr<Subscriber>(new Subscriber(subscriber));
   if ( !!sub ) {
+    if (!groupname.empty()) topicname = groupname + "@" + topicname;
     s_mapSubscribed[topicname] = sub;
   } else {
     ROS_ERROR("s_mapSubscribed");
@@ -916,13 +916,25 @@ pointer ROSEUS_SUBSCRIBE(register context *ctx,int n,pointer *argv)
 
 pointer ROSEUS_UNSUBSCRIBE(register context *ctx,int n,pointer *argv)
 {
-  string topicname;
+  string topicname, ending;
+  bool bSuccess = false;
 
   ckarg(1);
   if (isstring(argv[0])) topicname = ros::names::resolve((char *)get_string(argv[0]));
   else error(E_NOSTRING);
+  ending = "@" + topicname;
 
-  bool bSuccess = s_mapSubscribed.erase(topicname)>0;
+  // erase all subscribers associated with topicname, using any groupname
+  map<string, boost::shared_ptr<Subscriber> >::iterator it = s_mapSubscribed.begin();
+  while(it != s_mapSubscribed.end()) {
+    if (!topicname.compare(it->first) ||
+        equal(ending.rbegin(), ending.rend(), it->first.rbegin()))
+      {
+        s_mapSubscribed.erase(it++);
+        bSuccess = true;
+      }
+    else ++it;
+  }
 
   return (bSuccess?T:NIL);
 }
