@@ -941,42 +941,46 @@ pointer ROSEUS_UNSUBSCRIBE(register context *ctx,int n,pointer *argv)
 
 pointer ROSEUS_GETNUMPUBLISHERS(register context *ctx,int n,pointer *argv)
 {
-  string topicname;
-  int ret;
+  string topicname, ending;
 
   ckarg(1);
   if (isstring(argv[0])) topicname = ros::names::resolve((char *)get_string(argv[0]));
   else error(E_NOSTRING);
+  ending = "@" + topicname;
 
-  bool bSuccess = false;
-  map<string, boost::shared_ptr<Subscriber> >::iterator it = s_mapSubscribed.find(topicname);
-  if( it != s_mapSubscribed.end() ) {
-    boost::shared_ptr<Subscriber> subscriber = (it->second);
-    ret = subscriber->getNumPublishers();
-    bSuccess = true;
+  map<string, boost::shared_ptr<Subscriber> >::iterator it = s_mapSubscribed.begin();
+  while(it != s_mapSubscribed.end()) {
+    if (!topicname.compare(it->first) ||
+        equal(ending.rbegin(), ending.rend(), it->first.rbegin()))
+      {
+        return makeint(it->second->getNumPublishers());
+      }
+    else ++it;
   }
-
-  return (bSuccess?(makeint(ret)):NIL);
+  return (NIL);
 }
 
 pointer ROSEUS_GETTOPICSUBSCRIBER(register context *ctx,int n,pointer *argv)
 {
-  string topicname;
+  string topicname, ending;
   string ret;
 
   ckarg(1);
   if (isstring(argv[0])) topicname = ros::names::resolve((char *)get_string(argv[0]));
   else error(E_NOSTRING);
+  ending = "@" + topicname;
 
-  bool bSuccess = false;
-  map<string, boost::shared_ptr<Subscriber> >::iterator it = s_mapSubscribed.find(topicname);
-  if( it != s_mapSubscribed.end() ) {
-    boost::shared_ptr<Subscriber> subscriber = (it->second);
-    ret = subscriber->getTopic();
-    bSuccess = true;
+  map<string, boost::shared_ptr<Subscriber> >::iterator it = s_mapSubscribed.begin();
+  while(it != s_mapSubscribed.end()) {
+    if (!topicname.compare(it->first) ||
+        equal(ending.rbegin(), ending.rend(), it->first.rbegin()))
+      {
+        ret = it->second->getTopic();
+        return makestring((char *)ret.c_str(), ret.length());
+      }
+    else ++it;
   }
-
-  return (bSuccess?(makestring((char *)ret.c_str(), ret.length())):NIL);
+  return (NIL);
 }
 
 pointer ROSEUS_ADVERTISE(register context *ctx,int n,pointer *argv)
