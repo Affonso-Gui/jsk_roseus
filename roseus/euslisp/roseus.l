@@ -13,17 +13,16 @@
 
 (in-package "ROS")
 
-(defun ros::roseus-sigint-handler (sig code)
-  (ros::ROS-WARN (format nil "ros::roseus-sigint-handler ~A" sig))
+(defun ros::roseus-sigint-handler (sig)
+  (ros::ros-error "Received shutdown request (SIGINT)")
   (exit 1))
 
-(defun ros::roseus-error (code msg1 form &optional (msg2))
-   (format *error-output* "~C[1;3~Cm~A roseus-error: ~A"
-                #x1b (+ 1 48)   *program-name* msg1)
-   (if msg2 (format *error-output* " ~A" msg2))
-   (if form (format *error-output* " in ~s" form))
-   (format *error-output* ", exitting...~C[0m~%"  #x1b)
-   (exit 1))
+(defun ros::roseus-error (err)
+  (when (send err :callstack)
+    (lisp::print-callstack (send err :callstack) lisp::*max-callstack-depth*))
+  (let ((errstr (with-output-to-string (str) (lisp::print-error-message err str))))
+    (ros::ros-error errstr))
+  (exit 1))
 
 (defun ros::roseus (name &key
                     (anonymous t)
