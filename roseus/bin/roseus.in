@@ -17,6 +17,8 @@ case $1 in
         shift # past argument
         GDB_OPTIONS=/tmp/roseus_gdbinit
         cat <<EOF > $GDB_OPTIONS
+handle SIGUSR1 nostop noprint
+handle SIGUSR2 nostop noprint
 break error
 commands
 where
