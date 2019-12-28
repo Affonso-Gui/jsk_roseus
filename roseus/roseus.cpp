@@ -757,6 +757,41 @@ pointer ROSEUS_SPINONCE(register context *ctx,int n,pointer *argv)
   return (T);
 }
 
+pointer ROSEUS_WAITFORMESSAGE(register context *ctx,int n, pointer *argv)
+{
+  isInstalledCheck;
+  numunion nu;
+  ckarg2(0, 2);
+  // ;; arguments ;;
+  // [ timeout, groupname ]
+  CallbackQueue* queue;
+  float timeout=0.0;
+
+  if ( n > 0 ) {
+    timeout=ckfltval(argv[0]);}
+  if ( n > 1 ) {
+    string groupname;
+    boost::shared_ptr<NodeHandle> hdl;
+    if (get_nodehandle(argv[1], &groupname, &hdl)) {
+      queue = (CallbackQueue *)hdl->getCallbackQueue();}
+    else {
+      ROS_ERROR("Groupname %s is missing", groupname.c_str());
+      error(E_USER, "groupname not found");}
+  }
+  else {
+    queue = ros::getGlobalCallbackQueue();}
+
+  if (timeout) {
+    queue->callAvailable(ros::WallDuration(timeout));}
+  else {
+    ros::Rate r(100);
+    while (ros::ok() && queue->isEmpty()) {
+      breakck;
+      r.sleep();}
+    queue->callAvailable();}
+  return (NIL);
+}
+
 pointer ROSEUS_TIME_NOW(register context *ctx,int n,pointer *argv)
 {
   isInstalledCheck;
@@ -2013,6 +2048,8 @@ pointer ___roseus(register context *ctx, int n, pointer *argv, pointer env)
   defun(ctx,"SPIN-ONCE",argv[0],(pointer (*)())ROSEUS_SPINONCE,
          "&optional groupname  ;; spin only group\n\n"
          "Process a single round of callbacks.\n");
+  defun(ctx,"WAIT-FOR-MESSAGE",argv[0],(pointer (*)())ROSEUS_WAITFORMESSAGE,
+        "(&optional timeout groupname)");
   defun(ctx,"TIME-NOW-RAW",argv[0],(pointer (*)())ROSEUS_TIME_NOW, "");
   defun(ctx,"RATE",argv[0],(pointer (*)())ROSEUS_RATE, "frequency\n\n" "Construct ros timer for periodic sleeps");
   defun(ctx,"SLEEP",argv[0],(pointer (*)())ROSEUS_SLEEP, "Sleeps for any leftover time in a cycle. Calculated from the last time sleep, reset, or the constructor was called.");
