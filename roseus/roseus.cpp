@@ -789,7 +789,7 @@ pointer ROSEUS_WAITFORMESSAGE(register context *ctx,int n, pointer *argv)
   else {
     ros::Rate r(100);
     while (ros::ok() && queue->isEmpty()) {
-      breakck;
+      // breakck;
       r.sleep();}
     queue->callAvailable();}
   return (NIL);
@@ -823,6 +823,7 @@ pointer ROSEUS_SLEEP(register context *ctx,int n,pointer *argv)
 {
   isInstalledCheck;
   s_rate->sleep();
+  breakck;
   return (T);
 }
 
