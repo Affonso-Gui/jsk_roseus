@@ -854,7 +854,7 @@ pointer ROSEUS_EXIT(register context *ctx,int n,pointer *argv)
 pointer ROSEUS_SUBSCRIBE(register context *ctx,int n,pointer *argv)
 {
   isInstalledCheck;
-  string topicname;
+  string topicname, groupname;
   pointer message, fncallback, args;
   int queuesize = 1;
   NodeHandle *lnode = s_node.get();
@@ -866,7 +866,6 @@ pointer ROSEUS_SUBSCRIBE(register context *ctx,int n,pointer *argv)
 
   if (n > 1 && issymbol(argv[n-2]) && isstring(argv[n-1])) {
     if (argv[n-2] == K_ROSEUS_GROUPNAME) {
-      string groupname;
       groupname.assign((char *)get_string(argv[n-1]));
       map<string, boost::shared_ptr<NodeHandle > >::iterator it = s_mapHandle.find(groupname);
       if( it != s_mapHandle.end() ) {
@@ -897,6 +896,8 @@ pointer ROSEUS_SUBSCRIBE(register context *ctx,int n,pointer *argv)
   Subscriber subscriber = lnode->subscribe(so);
   boost::shared_ptr<Subscriber> sub = boost::shared_ptr<Subscriber>(new Subscriber(subscriber));
   if ( !!sub ) {
+    if (!groupname.empty()) topicname = groupname + "@" + topicname;
+    ROS_DEBUG("subscribe with identifier \"%s\"", topicname.c_str());
     s_mapSubscribed[topicname] = sub;
   } else {
     ROS_ERROR("s_mapSubscribed");
@@ -907,12 +908,21 @@ pointer ROSEUS_SUBSCRIBE(register context *ctx,int n,pointer *argv)
 
 pointer ROSEUS_UNSUBSCRIBE(register context *ctx,int n,pointer *argv)
 {
-  string topicname;
+  string topicname, groupname;
 
-  ckarg(1);
+  ckarg2(1,3);
+  if (n > 1 && issymbol(argv[n-2]) && isstring(argv[n-1])) {
+    if (argv[n-2] == K_ROSEUS_GROUPNAME) {
+      groupname.assign((char *)get_string(argv[n-1]));
+    }
+    else {
+      error(E_NOKEYPARAM,argv[n-2]);
+    }
+  }
   if (isstring(argv[0])) topicname = ros::names::resolve((char *)get_string(argv[0]));
   else error(E_NOSTRING);
 
+  if (!groupname.empty()) topicname = groupname + "@" + topicname;
   bool bSuccess = s_mapSubscribed.erase(topicname)>0;
 
   return (bSuccess?T:NIL);
@@ -2007,7 +2017,7 @@ pointer ___roseus(register context *ctx, int n, pointer *argv, pointer env)
   defun(ctx,"EXIT",argv[0],(pointer (*)())ROSEUS_EXIT, "Exit ros clinet");
 
   defun(ctx,"SUBSCRIBE",argv[0],(pointer (*)())ROSEUS_SUBSCRIBE,
-         "topicname message_type callbackfunc args0 ... argsN &optional (queuesize 1) %key (:groupname groupname)\n\n"
+         "topicname message_type callbackfunc args0 ... argsN &optional (queuesize 1) &key groupname\n\n"
          "Subscribe to a topic, version for class member function with bare pointer.\n"
          "This method connects to the master to register interest in a given topic. The node will automatically be connected with publishers on this topic. On each message receipt, fp is invoked and passed a shared pointer to the message received. This message should not be changed in place, as it is shared with any other subscriptions to this topic.\n"
          "\n"
@@ -2028,7 +2038,7 @@ pointer ___roseus(register context *ctx, int n, pointer *argv, pointer env)
          "	  (:string-cb (msg) (print (list 'cb self (send msg :data)))))\n"
          "	(setq m (instance string-cb-class :init))\n"
          );
-  defun(ctx,"UNSUBSCRIBE",argv[0],(pointer (*)())ROSEUS_UNSUBSCRIBE, "topicname\n\n""Unsubscribe topic");
+  defun(ctx,"UNSUBSCRIBE",argv[0],(pointer (*)())ROSEUS_UNSUBSCRIBE, "topicname &key groupname\n\n""Unsubscribe topic");
   defun(ctx,"GET-NUM-PUBLISHERS",argv[0],(pointer (*)())ROSEUS_GETNUMPUBLISHERS, "Returns the number of publishers this subscriber is connected to. ");
   defun(ctx,"GET-TOPIC-SUBSCRIBER",argv[0],(pointer (*)())ROSEUS_GETTOPICSUBSCRIBER, "topicname\n\n""Retuns the name of topic if it already subscribed");
   defun(ctx,"ADVERTISE",argv[0],(pointer (*)())ROSEUS_ADVERTISE,
