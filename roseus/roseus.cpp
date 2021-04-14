@@ -930,13 +930,22 @@ pointer ROSEUS_UNSUBSCRIBE(register context *ctx,int n,pointer *argv)
 
 pointer ROSEUS_GETNUMPUBLISHERS(register context *ctx,int n,pointer *argv)
 {
-  string topicname;
+  string topicname, groupname;
   int ret;
 
-  ckarg(1);
+  ckarg2(1,3);
+  if (n > 1 && issymbol(argv[n-2]) && isstring(argv[n-1])) {
+    if (argv[n-2] == K_ROSEUS_GROUPNAME) {
+      groupname.assign((char *)get_string(argv[n-1]));
+    }
+    else {
+      error(E_NOKEYPARAM,argv[n-2]);
+    }
+  }
   if (isstring(argv[0])) topicname = ros::names::resolve((char *)get_string(argv[0]));
   else error(E_NOSTRING);
 
+  if (!groupname.empty()) topicname = groupname + "@" + topicname;
   bool bSuccess = false;
   map<string, boost::shared_ptr<Subscriber> >::iterator it = s_mapSubscribed.find(topicname);
   if( it != s_mapSubscribed.end() ) {
@@ -950,13 +959,22 @@ pointer ROSEUS_GETNUMPUBLISHERS(register context *ctx,int n,pointer *argv)
 
 pointer ROSEUS_GETTOPICSUBSCRIBER(register context *ctx,int n,pointer *argv)
 {
-  string topicname;
+  string topicname, groupname;
   string ret;
 
-  ckarg(1);
+  ckarg2(1,3);
+  if (n > 1 && issymbol(argv[n-2]) && isstring(argv[n-1])) {
+    if (argv[n-2] == K_ROSEUS_GROUPNAME) {
+      groupname.assign((char *)get_string(argv[n-1]));
+    }
+    else {
+      error(E_NOKEYPARAM,argv[n-2]);
+    }
+  }
   if (isstring(argv[0])) topicname = ros::names::resolve((char *)get_string(argv[0]));
   else error(E_NOSTRING);
 
+  if (!groupname.empty()) topicname = groupname + "@" + topicname;
   bool bSuccess = false;
   map<string, boost::shared_ptr<Subscriber> >::iterator it = s_mapSubscribed.find(topicname);
   if( it != s_mapSubscribed.end() ) {
@@ -2014,7 +2032,7 @@ pointer ___roseus(register context *ctx, int n, pointer *argv, pointer env)
   defun(ctx,"ROS-WARN",argv[0],(pointer (*)())ROSEUS_ROSWARN, "write mesage to warn output");
   defun(ctx,"ROS-ERROR",argv[0],(pointer (*)())ROSEUS_ROSERROR, "write mesage to error output");
   defun(ctx,"ROS-FATAL",argv[0],(pointer (*)())ROSEUS_ROSFATAL, "write mesage to fatal output");
-  defun(ctx,"EXIT",argv[0],(pointer (*)())ROSEUS_EXIT, "Exit ros clinet");
+  defun(ctx,"EXIT",argv[0],(pointer (*)())ROSEUS_EXIT, "Exit ros client");
 
   defun(ctx,"SUBSCRIBE",argv[0],(pointer (*)())ROSEUS_SUBSCRIBE,
          "topicname message_type callbackfunc args0 ... argsN &optional (queuesize 1) &key groupname\n\n"
@@ -2039,8 +2057,8 @@ pointer ___roseus(register context *ctx, int n, pointer *argv, pointer env)
          "	(setq m (instance string-cb-class :init))\n"
          );
   defun(ctx,"UNSUBSCRIBE",argv[0],(pointer (*)())ROSEUS_UNSUBSCRIBE, "topicname &key groupname\n\n""Unsubscribe topic");
-  defun(ctx,"GET-NUM-PUBLISHERS",argv[0],(pointer (*)())ROSEUS_GETNUMPUBLISHERS, "Returns the number of publishers this subscriber is connected to. ");
-  defun(ctx,"GET-TOPIC-SUBSCRIBER",argv[0],(pointer (*)())ROSEUS_GETTOPICSUBSCRIBER, "topicname\n\n""Retuns the name of topic if it already subscribed");
+  defun(ctx,"GET-NUM-PUBLISHERS",argv[0],(pointer (*)())ROSEUS_GETNUMPUBLISHERS, "topicname &key groupname\n\n""Returns the number of publishers this subscriber is connected to. ");
+  defun(ctx,"GET-TOPIC-SUBSCRIBER",argv[0],(pointer (*)())ROSEUS_GETTOPICSUBSCRIBER, "topicname &key groupname\n\n""Retuns the name of topic if it is already subscribed");
   defun(ctx,"ADVERTISE",argv[0],(pointer (*)())ROSEUS_ADVERTISE,
          "topic message_class &optional (queuesize 1) (latch nil)\n"
          "Advertise a topic.\n"
@@ -2058,8 +2076,8 @@ pointer ___roseus(register context *ctx, int n, pointer *argv, pointer env)
          "	  (send msg :data (format nil \"hello world ~a\" (send (ros::time-now) :sec-nsec)))\n"
          "	  (ros::publish \"chatter\" msg)\n"
          "	  (ros::sleep))\n");
-  defun(ctx,"GET-NUM-SUBSCRIBERS",argv[0],(pointer (*)())ROSEUS_GETNUMSUBSCRIBERS, "Retuns number of subscribers this publish is connected to");
-  defun(ctx,"GET-TOPIC-PUBLISHER",argv[0],(pointer (*)())ROSEUS_GETTOPICPUBLISHER, "topicname\n\n""Retuns the name of topic if it already published");
+  defun(ctx,"GET-NUM-SUBSCRIBERS",argv[0],(pointer (*)())ROSEUS_GETNUMSUBSCRIBERS, "topicname &key groupname\n\n""Retuns the number of subscribers this publisher is connected to.");
+  defun(ctx,"GET-TOPIC-PUBLISHER",argv[0],(pointer (*)())ROSEUS_GETTOPICPUBLISHER, "topicname &key groupname\n\n""Retuns the name of topic if it already published");
 
   defun(ctx,"WAIT-FOR-SERVICE",argv[0],(pointer (*)())ROSEUS_WAIT_FOR_SERVICE, "servicename &optional timeout\n\n""Wait for a service to be advertised and available. Blocks until it is. If the timeout is -1, wait until the node is shutdown. Otherwise it wait for timeout seconds");
   defun(ctx,"SERVICE-EXISTS", argv[0], (pointer (*)())ROSEUS_SERVICE_EXISTS, "servicename\n\n""Checks if a service is both advertised and available.");

@@ -141,8 +141,8 @@
      (ros::rate 10)
      (while (or (= (ros::get-num-subscribers goal-topic) 0)
                 (= (ros::get-num-subscribers cancel-topic) 0)
-                (= (ros::get-num-publishers feedback-topic) 0)
-                (= (ros::get-num-publishers result-topic) 0))
+                (= (ros::get-num-publishers feedback-topic :groupname groupname) 0)
+                (= (ros::get-num-publishers result-topic :groupname groupname) 0))
        (ros::ros-debug "[~A] num subscribers ~A ~d, ~A ~d" name-space
 		       goal-topic (ros::get-num-subscribers goal-topic)
 		       cancel-topic (ros::get-num-subscribers cancel-topic))
@@ -156,8 +156,8 @@
          (ros::ros-warn "     goal=~d, cancel=~d, feedback=~d, result=~d"
                         (ros::get-num-subscribers goal-topic)
                         (ros::get-num-subscribers cancel-topic)
-                        (ros::get-num-publishers feedback-topic)
-                        (ros::get-num-publishers result-topic))
+                        (ros::get-num-publishers feedback-topic :groupname groupname)
+                        (ros::get-num-publishers result-topic :groupname groupname))
          (return-from :wait-for-server nil))
        (incf count))
      t))
@@ -210,7 +210,7 @@
 	   (let* ((tm (ros::time- (ros::time-now) start)))
 	     (if (> (send tm :to-sec) timeout) (return-from :wait-for-result nil))))
        (when return-if-server-down
-	 (when (= (ros::get-num-publishers result-topic) 0)
+	 (when (= (ros::get-num-publishers result-topic :groupname groupname) 0)
 	   (ros::ros-error "[~A] Unexpected returns from :wait-for-result : no publishers found for ~A" name-space result-topic)
 	   (return-from :wait-for-result nil))
 	 (when (and status-stamp maximum-status-interval (> (send (ros::time- (ros::time-now) status-stamp) :to-sec) maximum-status-interval))
