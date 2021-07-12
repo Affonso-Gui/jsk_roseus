@@ -13,7 +13,7 @@ catkin build roseus_bt_tutorials
 ![t01](https://user-images.githubusercontent.com/20625381/125036489-082d3f80-e0ce-11eb-8cce-d87a06b2c1d8.gif)
 
 We start with a simple behavior tree, composed only by a few actions organized into a single sequence.
-The model file https://github.com/Affonso-Gui/jsk_roseus/blob/roseus_bt/roseus_bt/sample/models/t01_simple_tree.xml is divided into the following two main sections:
+The model file https://github.com/jsk-ros-pkg/jsk_roseus/blob/master/roseus_bt/sample/models/t01_simple_tree.xml is divided into the following two main sections:
 - `<BehaviorTree/>` specifies the tree structure
 - `<TreeNodesModel/>` specifies the custom node palette
 
@@ -44,7 +44,7 @@ rosrun groot Groot
 ## t02_conditions
 ![t02](https://user-images.githubusercontent.com/20625381/125036852-707c2100-e0ce-11eb-99b8-a8d568e6e97c.gif)
 
-The second example https://github.com/Affonso-Gui/jsk_roseus/blob/roseus_bt/roseus_bt/sample/models/t02_conditions.xml also includes condition and fallback nodes.
+The second example https://github.com/jsk-ros-pkg/jsk_roseus/blob/master/roseus_bt/sample/models/t02_conditions.xml also includes condition and fallback nodes.
 
 Every `<Condition/>` tag in the `<TreeNodesModel/>` must be provided with an arbitrary `service_name` field.
 
@@ -69,7 +69,7 @@ rosrun groot Groot
 ## t03_ports
 ![t03](https://user-images.githubusercontent.com/20625381/125036607-25faa480-e0ce-11eb-9013-28b2c41c90f2.gif)
 
-The third example https://github.com/Affonso-Gui/jsk_roseus/blob/roseus_bt/roseus_bt/sample/models/t03_ports.xml introduces Ports, which act as the input and output arguments for nodes.
+The third example https://github.com/jsk-ros-pkg/jsk_roseus/blob/master/roseus_bt/sample/models/t03_ports.xml introduces Ports, which act as the input and output arguments for nodes.
 
 Ports are strongly typed and can take any type which can be used in a ROS message field (e.g. `int64` and `int32` are accepted but `int` is not supported).
 
@@ -104,7 +104,7 @@ rosrun groot Groot
 ## t04_subscriber
 ![t04](https://user-images.githubusercontent.com/20625381/125036625-2b57ef00-e0ce-11eb-8198-974d1b45855a.gif)
 
-The fourth example https://github.com/Affonso-Gui/jsk_roseus/blob/roseus_bt/roseus_bt/sample/models/t04_subscriber.xml shows how we can remap topic messages to port variables.
+The fourth example https://github.com/jsk-ros-pkg/jsk_roseus/blob/master/roseus_bt/sample/models/t04_subscriber.xml shows how we can remap topic messages to port variables.
 
 Such port variables are initialized with an empty message instance and updated every time a new topic message arrives.
 
@@ -148,7 +148,7 @@ rosrun groot Groot
 ## t05_subtrees
 ![t05](https://user-images.githubusercontent.com/20625381/125036658-3448c080-e0ce-11eb-9592-23f6b424bcd1.gif)
 
-The fifth example https://github.com/Affonso-Gui/jsk_roseus/blob/roseus_bt/roseus_bt/sample/models/t05_subtrees.xml wraps up the previous task in a subtree and adds another example task.
+The fifth example https://github.com/jsk-ros-pkg/jsk_roseus/blob/master/roseus_bt/sample/models/t05_subtrees.xml wraps up the previous task in a subtree and adds another example task.
 
 Nested trees can be defined with multiple `<BehaviorTree/>` tags and referenced with the `<SubTree/>` tag.
 
@@ -175,7 +175,7 @@ rosrun groot Groot
 ## t06_reactive
 ![t06](https://user-images.githubusercontent.com/20625381/125036676-390d7480-e0ce-11eb-813e-69784c2053a9.gif)
 
-The sixth example https://github.com/Affonso-Gui/jsk_roseus/blob/roseus_bt/roseus_bt/sample/models/t06_reactive.xml uses reactive fallbacks to constantly check and respond to user requests.
+The sixth example https://github.com/jsk-ros-pkg/jsk_roseus/blob/master/roseus_bt/sample/models/t06_reactive.xml uses reactive fallbacks to constantly check and respond to user requests.
 
 The main difference of reactive nodes (e.g. `<ReactiveSequence/>` and `<ReactiveFallback/>`) is that when a child returns RUNNING the reactive node will resume ticking from its first child. This forces the node to re-evaluate any conditions preceding the execution node, therefore achieving enhanced reactivity.
 
@@ -213,7 +213,7 @@ rosrun groot Groot
 
 ## t07_xacro
 
-The final example https://github.com/Affonso-Gui/jsk_roseus/blob/roseus_bt/roseus_bt/sample/models/t07_xacro.xml.xacro illustrates how we can use the xacro package to improve readability and modularity of the model file descriptions.
+The final example https://github.com/jsk-ros-pkg/jsk_roseus/blob/master/roseus_bt/sample/models/t07_xacro.xml.xacro illustrates how we can use the xacro package to improve readability and modularity of the model file descriptions.
 
 The following will create the `t07_xacro.xml` file equivalent to the `t05_subtrees.xml` example
 ```bash
